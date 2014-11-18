@@ -1,8 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 set -ex
-mkdir -p `pwd`/dist
-chmod 777 `pwd`/dist
-docker build -t fig .
-docker run -u user -v `pwd`/dist:/code/dist fig pyinstaller -F bin/fig
-mv dist/fig dist/fig-Linux-x86_64
-docker run -u user -v `pwd`/dist:/code/dist fig dist/fig-Linux-x86_64 --version
+PD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pushd "${PD}" >/dev/null
+mkdir -p "${PD}/../dist"
+chmod 777 "${PD}/../dist"
+git checkout "${PD}/../fig/__init__.py"
+echo "__version__ = __version__ + '-KD-$(date +%Y%m%d)-$(git rev-parse HEAD | cut -b1-6)'" >> "${PD}/../fig/__init__.py"
+#docker build -t fig .
+sudo docker run --rm -u user -v "${PD}/..:/code" fig pyinstaller -F bin/fig
+git checkout "${PD}/../fig/__init__.py"
+#mv dist/fig dist/fig-Linux-x86_64
+sudo docker run --rm -u user -v "${PD}/..:/code" fig dist/fig --version
+popd >/dev/null
