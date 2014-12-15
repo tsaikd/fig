@@ -27,6 +27,7 @@ DOCKER_CONFIG_KEYS = [
     'environment',
     'hostname',
     'image',
+    'interactive',
     'mem_limit',
     'net',
     'ports',
@@ -405,6 +406,12 @@ class Service(object):
             container_options['image'] = self._build_tag_name()
         else:
             container_options['image'] = self._get_image_name(container_options['image'])
+
+        # interactive mode should set option stdin_open and tty
+        if 'interactive' in container_options:
+            container_options['stdin_open'] = container_options['interactive']
+            container_options['tty'] = container_options['interactive']
+            del container_options['interactive']
 
         # Delete options which are only used when starting
         for key in ['privileged', 'net', 'dns', 'restart', 'cap_add', 'cap_drop', 'env_file']:
